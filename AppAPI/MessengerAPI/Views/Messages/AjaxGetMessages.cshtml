@@ -1,0 +1,14 @@
+﻿@model IEnumerable<AppAPI.Models.Message>
+
+<div class="alert alert-info" style="text-align: center;">Ваш собеседник: @ViewData["Friend"]</div>
+@foreach (var item in Model)
+{
+    <div class="message">
+        <div>
+            <span class="label label-default">@item.senderID</span>
+            <span class="label label-default" style="float:right; margin-top: 3px;">@item.timeSent</span>
+            <div class="alert alert-info">@item.text</div>
+
+        </div>        
+    </div>
+}

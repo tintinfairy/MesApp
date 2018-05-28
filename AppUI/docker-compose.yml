@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  messengerui:
+    image: ${DOCKER_REGISTRY}messengerui
+    build:
+      context: .
+      dockerfile: MessengerUI\Dockerfile

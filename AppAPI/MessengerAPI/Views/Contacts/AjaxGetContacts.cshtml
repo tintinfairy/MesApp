@@ -1,0 +1,20 @@
+﻿@model AppAPI.Models.UserContacts
+@foreach (var item in Model.contacts)
+{
+    <div>
+        <div>
+            <h4>
+                <button class="btn btn-info" id="@item.Value">
+                    @item.Value
+                </button>
+            </h4>
+        </div>
+    </div>
+}
+
+<script>
+    //выбор контакта
+    $(".btn-info").click(function () {
+        window.receiverID = $(this).attr("id");
+    });
+</script>

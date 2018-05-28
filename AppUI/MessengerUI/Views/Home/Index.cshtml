@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <title>@ViewData["Title"] - Messenger</title>
+</head>
+<body style="background-color:#C0C0C0;"> 
+    <div style="margin: 0 auto; width: 900px;"  >
+        <div style="margin-top: 10px; align-content:center">
+            <b><font size="5" color="#5F9EA0" face="Arial">H</font>ello, @ViewData["username"]! Add contact and start your conversation right now.</b>
+            <a href="/Account/Logout" style="float: right;">Log out</a>
+        </div>
+
+
+
+        <div class="users" style="align-content:center; width: 300px; height: 200px; overflow-y: auto;">
+            <div class="input-group" style="align-content:center">
+                <input id="addContact" type="text" class="form-control" placeholder="Add contact" aria-describedby="basic-addon2" style="width: 150px;">
+                <input id="removeContact" type="text" class="form-control" placeholder="Delete contact" aria-describedby="basic-addon2" style="width: 150px;">
+                
+            </div>
+            <div class="input-group" style="align-content:center">
+                <button id="btnAddContact" class="btn btn-primary" style="width: 100px;background-color:#5F9EA0">Add</button>
+                &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
+                <button id="btnRemoveContact" class="btn btn-primary" style="width: 100px;background-color:#5F9EA0">Delete</button>
+            </div>
+                <div id="contacts"></div>
+            </div>
+        <div id="messages" class="messages thumbnail" style=" width: 700px; height: 400px; overflow-y: auto;"></div>
+
+        <div class="input-group">
+            <input id="text" type="text" class="form-control" placeholder="Type your message here" aria-describedby="basic-addon2" style="width: 600px;">
+            <button id="sendMessage" class="btn btn-primary" style="width: 150px;background-color:#5F9EA0">Send</button>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<script>
+	$.ajaxSetup({
+		crossDomain: true
+	});
+    //обновление сообщений
+    window.setInterval(function () {
+        if (window.receiverID != null) {
+            messagesData = {};
+            messagesData['senderID'] = "@ViewData["username"]";
+            messagesData['receiverID'] = window.receiverID;
+            $.ajax({
+                type: "get",
+                url: "http://172.18.0.22/Messages/GetMessages/",
+                data: messagesData,
+                success: function (data) {
+                    $("#messages").empty();
+                    $("#messages").append(data);
+                    //$("#messages").scrollTop(10000000000000);
+                }
+            });
+        }
+    }, 250);
+
+
+    //отправка сообщения
+    $("#sendMessage").click(function () {
+        if (window.receiverID != null) {
+            data = {};
+            data['text'] = $("#text").val();
+            data['senderID'] = "@ViewData["username"]";
+            data['receiverID'] = window.receiverID;
+            $.post({
+                url: "http://172.18.0.22/Messages/Create",
+                data: data,
+                success: function (data) {
+                    $("#messages").empty();
+                    messagesData['receiverID'] = window.receiverID;
+                    $.ajax({
+                        type: "get",
+                        url: "http://172.18.0.22/Messages/GetMessages/",
+                        data: messagesData,
+                        success: function (data) {
+                            $("#messages").append(data);
+                            $("#messages").scrollTop(10000000000000);
+                        }
+                    });
+                }
+            });
+        }
+        else {
+            alert("Вы не выбрали собеседника!");
+        }
+    });
+
+    contactsData = {};
+    contactsData["owner"] = "@ViewData["username"]";
+
+    //обновление контактов при загрузке страницы
+    $.ajax({
+        type: "get",
+        url: "http://172.18.0.22/Contacts/GetContacts/",
+        data: contactsData,
+        success: function (data) {
+            $("#contacts").append(data);
+            $("#messages").scrollTop(10000000000000);
+        }
+    });
+
+    //добавление контакта
+    $("#btnAddContact").click(function () {
+        data = {};
+        data['owner'] = "@ViewData["username"]";
+        data['username'] = $("#addContact").val();
+        $.post({
+            url: "http://172.18.0.22/Contacts/Add",
+            data: data,
+            success: function (data) {
+                $("#contacts").empty();
+                $.ajax({
+                    type: "get",
+                    url: "http://172.18.0.22/Contacts/GetContacts/",
+                    data: contactsData,
+                    success: function (data) {
+                        $("#contacts").append(data);
+                        $("#messages").scrollTop(10000000000000);
+                    }
+                });
+            }
+        });
+    });
+
+    //удаление контакта
+    $("#btnRemoveContact").click(function () {
+        data = {};
+        data['owner'] = "@ViewData["username"]";
+        data['username'] = $("#removeContact").val();
+        $.post({
+            url: "http://localhost:51391/Contacts/Delete",
+            data: data,
+            success: function (data) {
+                $("#contacts").empty();
+                $.ajax({
+                    type: "get",
+                    url: "http://localhost:51391/Contacts/GetContacts/",
+                    data: contactsData,
+                    success: function (data) {
+                        $("#contacts").append(data);
+                        $("#messages").scrollTop(10000000000000);
+                    }
+                });
+            }
+        });
+    });
+
+
+</script>
